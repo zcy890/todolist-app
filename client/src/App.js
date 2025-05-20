@@ -9,6 +9,7 @@ import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import CalendarPicker from "./components/CalendarPicker";
 import "./App.css";
+import Footer from "./components/Footer";
 
 const API = "https://todolist-backend-bk7s.onrender.com/api/todos";
 
@@ -117,6 +118,7 @@ function App() {
           <TaskList tasks={filteredTodos} onDelete={deleteTodo} />
         </Box>
       </Container>
+      <Footer />
     </LocalizationProvider>
   );
 }
