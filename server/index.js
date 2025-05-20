@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
+const PORT = process.env.PORT;
 const db = require("./db"); // Corrected relative path
 
 async function createTable() {
@@ -20,8 +21,8 @@ async function createTable() {
     console.log('Table "items" created successfully.');
 
     // Start the server after table creation
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error("Error creating table:", err);
@@ -72,5 +73,3 @@ app.delete("/api/todos/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete todo" });
   }
 });
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
