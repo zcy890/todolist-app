@@ -10,7 +10,7 @@ import TaskList from "./components/TaskList";
 import CalendarPicker from "./components/CalendarPicker";
 import "./App.css";
 
-const API = "https://todolist-backend-bk7s.onrender.com";
+const API = "https://todolist-backend-bk7s.onrender.com/api/todos";
 
 function App() {
   const [todos, setTodos] = useState([]);
