@@ -1,11 +1,34 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const db = require("./db"); // Corrected relative path
-const PORT = 5000;
-
 app.use(cors());
 app.use(express.json());
+const db = require("./db"); // Corrected relative path
+
+async function createTable() {
+  try {
+    await db.connect();
+    const createTableQuery = `
+      CREATE TABLE todos (
+      id UUID PRIMARY KEY,
+      text TEXT NOT NULL,
+      type TEXT NOT NULL,
+      date DATE NOT NULL
+      );
+    `;
+    await db.query(createTableQuery);
+    console.log('Table "items" created successfully.');
+
+    // Start the server after table creation
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  } catch (err) {
+    console.error("Error creating table:", err);
+  }
+}
+
+createTable();
 
 app.get("/api/todos", async (req, res) => {
   try {

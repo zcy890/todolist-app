@@ -10,7 +10,7 @@ import TaskList from "./components/TaskList";
 import CalendarPicker from "./components/CalendarPicker";
 import "./App.css";
 
-const API = "http://localhost:5000/api/todos";
+const API = "https://todolist-frontend-idfz.onrender.com/api/todos";
 
 function App() {
   const [todos, setTodos] = useState([]);
