@@ -1,40 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const db = require("./db");
+
 app.use(cors());
 app.use(express.json());
-const PORT = process.env.PORT;
-const db = require("./db"); // Corrected relative path
 
-async function createTable() {
-  try {
-    await db.connect();
-    const createTableQuery = `
-      CREATE TABLE todos (
-      id UUID PRIMARY KEY,
-      text TEXT NOT NULL,
-      type TEXT NOT NULL,
-      date DATE NOT NULL
-      );
-    `;
-    await db.query(createTableQuery);
-    console.log('Table "items" created successfully.');
+const PORT = process.env.PORT || 5000;
 
-    // Start the server after table creation
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("Error creating table:", err);
-  }
-}
-
-createTable();
-
+// API Routes
 app.get("/api/todos", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM todos ORDER BY date ASC");
-    res.json(result.rows); // <-- This should be an array
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error" });
@@ -43,10 +21,7 @@ app.get("/api/todos", async (req, res) => {
 
 app.post("/api/todos", async (req, res) => {
   const { id, text, type, date } = req.body;
-  console.log(id);
-  console.log(text);
-  console.log(type);
-  console.log(date);
+
   if (!id || !text || !type || !date) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -72,4 +47,9 @@ app.delete("/api/todos/:id", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to delete todo" });
   }
+});
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
