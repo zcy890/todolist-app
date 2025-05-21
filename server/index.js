@@ -9,6 +9,12 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 // API Routes
+
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
+
+
 app.get("/api/todos", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM todos ORDER BY date ASC");
