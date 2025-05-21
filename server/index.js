@@ -19,16 +19,19 @@ app.get("/api/todos", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM todos ORDER BY date ASC");
     res.json(result.rows);
+    console.log("Fetched todos:", result.rows);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching todos:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
 
 app.post("/api/todos", async (req, res) => {
   const { id, text, type, date } = req.body;
+  console.log("POST /api/todos - received body:", req.body);
 
   if (!id || !text || !type || !date) {
+    console.warn("Missing fields in request body");
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -37,9 +40,10 @@ app.post("/api/todos", async (req, res) => {
       "INSERT INTO todos (id, text, type, date) VALUES ($1, $2, $3, $4) RETURNING *",
       [id, text, type, date]
     );
+    console.log("Inserted todo:", result.rows[0]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("DB error:", err);
+    console.error("Error inserting todo:", err);
     res.status(500).json({ error: "Failed to insert todo" });
   }
 });
@@ -48,9 +52,10 @@ app.delete("/api/todos/:id", async (req, res) => {
   const id = req.params.id;
   try {
     await db.query("DELETE FROM todos WHERE id = $1", [id]);
+    console.log(`Deleted todo with id: ${id}`);
     res.status(200).json({ message: "Deleted" });
   } catch (err) {
-    console.error(err);
+    console.error(`Error deleting todo with id ${id}:`, err);
     res.status(500).json({ error: "Failed to delete todo" });
   }
 });
