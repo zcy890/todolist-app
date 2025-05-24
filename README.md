@@ -47,6 +47,8 @@ A full-stack, responsive to-do list application built with React.js and Express.
 
 ```
 ├── client/                 # React frontend
+│   ├── public/
+│   │   └── index.html     # HTML template
 │   ├── src/
 │   │   ├── components/     # Reusable React components
 │   │   │   ├── CalendarPicker.js
@@ -55,10 +57,16 @@ A full-stack, responsive to-do list application built with React.js and Express.
 │   │   │   ├── TaskList.js
 │   │   │   └── TaskTabs.js
 │   │   ├── App.js         # Main application component
-│   │   └── App.css        # Custom styling and animations
+│   │   ├── App.css        # Custom styling and animations
+│   │   ├── index.js       # React app entry point
+│   │   └── index.css      # Global styles
+│   ├── package.json       # Frontend dependencies
+│   └── package-lock.json  # Locked dependency versions
 └── server/                # Express backend
     ├── db.js             # PostgreSQL connection
-    └── index.js          # Server configuration and API routes
+    ├── index.js          # Server configuration and API routes
+    ├── package.json      # Backend dependencies
+    └── package-lock.json # Locked dependency versions
 ```
 
 ## 🛠️ Installation & Setup
@@ -187,7 +195,6 @@ Dynamic input field that changes placeholder text based on the current tab selec
 ### Performance Optimizations
 - Efficient state management with React Hooks
 - Optimized re-rendering with proper dependency arrays
-- Lazy loading and code splitting ready
 
 ## 🚀 Deployment
 
