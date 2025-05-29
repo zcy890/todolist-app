@@ -28,7 +28,7 @@ function App() {
           setTodos(data);
         } else {
           console.warn("Expected array, got:", data);
-          setTodos([]); // fallback
+          setTodos([]);
         }
       })
       .catch((err) => {
@@ -68,20 +68,21 @@ function App() {
     setSelectedDate(newDate);
   };
 
-  const today = dayjs().startOf("day");
+  const today = dayjs().format("YYYY-MM-DD");
 
   const filteredTodos = Array.isArray(todos)
     ? todos
         .filter((todo) => {
-          const todoDate = dayjs(todo.date).startOf("day");
           if (tab === "today") {
-            return todo.type === "today" && todoDate.isSame(today, "day");
+            return todo.type === "today" && todo.date === today;
           } else if (tab === "upcoming") {
-            return todoDate.isAfter(today, "day");
+            return todo.date > today;
           }
           return false;
         })
-        .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)))
+        .sort((a, b) => {
+          return a.date.localeCompare(b.date);
+        })
     : [];
 
   return (
