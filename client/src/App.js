@@ -43,7 +43,7 @@ function App() {
       id: uuidv4(),
       text: input,
       type: tab,
-      date: selectedDate.toDate().toISOString().split("T")[0], // This avoids UTC shift
+      date: selectedDate.format("YYYY-MM-DD"),
     };
     const res = await fetch(API, {
       method: "POST",
