@@ -7,7 +7,7 @@ A full-stack, responsive to-do list application built with React.js and Express.
 ## 🔗 Live Demo
 
 [View Live Application](https://cy-taskflow.onrender.com/)
-- **Please Note**: If you add a new task item, it could take up to 10 seconds to appear since I am using the FREE plan to host my application. Render puts my backend to sleep while inactive.
+- **Please Note**: Please allow up to 10 seconds for the web app to fully load before adding any task items. I am using the FREE plan to host my application and Render puts my backend to sleep after a period of inactivity. Sorry for the inconvenience. 
 
 ## 🌟 Features
 
