@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   List,
   ListItem,
@@ -7,11 +7,17 @@ import {
   Typography,
   Chip,
   Box,
+  TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import dayjs from "dayjs";
 
-const TaskList = ({ tasks, onDelete, tab }) => {
+const TaskList = ({ tasks, onDelete, onUpdate, tab }) => {
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
   const formatDate = (dateString) => {
     return dayjs(dateString).format("MMMM D, YYYY"); // e.g., May 20, 2025
   };
@@ -20,6 +26,32 @@ const TaskList = ({ tasks, onDelete, tab }) => {
     const taskDate = dayjs(dateString);
     const today = dayjs();
     return today.diff(taskDate, "day");
+  };
+
+  const handleEditStart = (todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  };
+
+  const handleEditSave = async (id) => {
+    if (editText.trim() && editText !== tasks.find((t) => t.id === id)?.text) {
+      await onUpdate(id, editText.trim());
+    }
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const handleKeyPress = (e, id) => {
+    if (e.key === "Enter") {
+      handleEditSave(id);
+    } else if (e.key === "Escape") {
+      handleEditCancel();
+    }
   };
 
   const getTabTitle = () => {
@@ -64,14 +96,60 @@ const TaskList = ({ tasks, onDelete, tab }) => {
           {tasks.map((todo) => {
             const isOverdue = tab === "past";
             const daysOverdue = isOverdue ? getDaysOverdue(todo.date) : 0;
+            const isEditing = editingId === todo.id;
+            const canEdit = tab === "today" || tab === "upcoming";
 
             return (
               <ListItem
                 key={todo.id}
                 secondaryAction={
-                  <IconButton edge="end" onClick={() => onDelete(todo.id)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    {canEdit && !isEditing && (
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleEditStart(todo)}
+                        sx={{
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                          "&:hover": {
+                            backgroundColor: "rgba(25, 118, 210, 0.12)",
+                          },
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    )}
+                    {isEditing && (
+                      <>
+                        <IconButton
+                          edge="end"
+                          onClick={() => handleEditSave(todo.id)}
+                          sx={{
+                            backgroundColor: "rgba(46, 125, 50, 0.08)",
+                            "&:hover": {
+                              backgroundColor: "rgba(46, 125, 50, 0.12)",
+                            },
+                          }}
+                        >
+                          <SaveIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          onClick={handleEditCancel}
+                          sx={{
+                            backgroundColor: "rgba(211, 47, 47, 0.08)",
+                            "&:hover": {
+                              backgroundColor: "rgba(211, 47, 47, 0.12)",
+                            },
+                          }}
+                        >
+                          <CancelIcon />
+                        </IconButton>
+                      </>
+                    )}
+                    <IconButton edge="end" onClick={() => onDelete(todo.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 }
                 sx={{
                   marginBottom: 1,
@@ -84,24 +162,51 @@ const TaskList = ({ tasks, onDelete, tab }) => {
               >
                 <ListItemText
                   primary={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <span>{todo.text}</span>
-                      {isOverdue && (
-                        <Chip
-                          label={`${daysOverdue} day${
-                            daysOverdue !== 1 ? "s" : ""
-                          } overdue`}
-                          color="error"
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        pr: canEdit ? 12 : 6,
+                      }}
+                    >
+                      {isEditing ? (
+                        <TextField
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => handleKeyPress(e, todo.id)}
+                          variant="outlined"
                           size="small"
-                          sx={{ fontSize: "0.75rem" }}
+                          fullWidth
+                          autoFocus
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "12px",
+                            },
+                          }}
                         />
+                      ) : (
+                        <>
+                          <span>{todo.text}</span>
+                          {isOverdue && (
+                            <Chip
+                              label={`${daysOverdue} day${
+                                daysOverdue !== 1 ? "s" : ""
+                              } overdue`}
+                              color="error"
+                              size="small"
+                              sx={{ fontSize: "0.75rem" }}
+                            />
+                          )}
+                        </>
                       )}
                     </Box>
                   }
                   secondary={
-                    tab === "past"
+                    !isEditing &&
+                    (tab === "past"
                       ? `Was due: ${formatDate(todo.date)}`
-                      : `Due: ${formatDate(todo.date)}`
+                      : `Due: ${formatDate(todo.date)}`)
                   }
                 />
               </ListItem>

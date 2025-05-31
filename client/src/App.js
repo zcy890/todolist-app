@@ -60,6 +60,20 @@ function App() {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
+  const updateTodo = async (id, updatedText) => {
+    try {
+      const res = await fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: updatedText }),
+      });
+      const updatedTodo = await res.json();
+      setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
+    } catch (err) {
+      console.error("Error updating todo:", err);
+    }
+  };
+
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -130,7 +144,12 @@ function App() {
               tab={tab}
             />
           )}
-          <TaskList tasks={filteredTodos} onDelete={deleteTodo} tab={tab} />
+          <TaskList
+            tasks={filteredTodos}
+            onDelete={deleteTodo}
+            onUpdate={updateTodo}
+            tab={tab}
+          />
         </Box>
       </Container>
       <Footer />
