@@ -75,13 +75,22 @@ function App() {
         .filter((todo) => {
           const todoDate = dayjs(todo.date).startOf("day");
           if (tab === "today") {
-            return todo.type === "today" && todoDate.isSame(today, "day");
+            return todoDate.isSame(today, "day");
           } else if (tab === "upcoming") {
             return todoDate.isAfter(today, "day");
+          } else if (tab === "past") {
+            return todoDate.isBefore(today, "day");
           }
           return false;
         })
-        .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)))
+        .sort((a, b) => {
+          // For past tasks, sort by most recent first (descending order)
+          if (tab === "past") {
+            return dayjs(b.date).diff(dayjs(a.date));
+          }
+          // For today and upcoming, sort by earliest first (ascending order)
+          return dayjs(a.date).diff(dayjs(b.date));
+        })
     : [];
 
   return (
@@ -104,18 +113,24 @@ function App() {
           >
             ✅ To-Do List
           </Typography>
-          <CalendarPicker
-            selectedDate={selectedDate}
-            onDateChange={handleDateChange}
-          />
+          {/* Only show calendar picker for today and upcoming tabs */}
+          {tab !== "past" && (
+            <CalendarPicker
+              selectedDate={selectedDate}
+              onDateChange={handleDateChange}
+            />
+          )}
           <TaskTabs currentTab={tab} onChange={handleTabChange} />
-          <TaskInput
-            inputValue={input}
-            onInputChange={(e) => setInput(e.target.value)}
-            onAdd={addTodo}
-            tab={tab}
-          />
-          <TaskList tasks={filteredTodos} onDelete={deleteTodo} />
+          {/* Only show task input for today and upcoming tabs */}
+          {tab !== "past" && (
+            <TaskInput
+              inputValue={input}
+              onInputChange={(e) => setInput(e.target.value)}
+              onAdd={addTodo}
+              tab={tab}
+            />
+          )}
+          <TaskList tasks={filteredTodos} onDelete={deleteTodo} tab={tab} />
         </Box>
       </Container>
       <Footer />
