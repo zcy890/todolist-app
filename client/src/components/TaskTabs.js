@@ -17,6 +17,7 @@ const TaskTabs = ({ currentTab, onChange }) => {
       >
         <Tab label="Today" value="today" />
         <Tab label="Upcoming" value="upcoming" />
+        <Tab label="Past" value="past" />
       </Tabs>
     </Box>
   );
