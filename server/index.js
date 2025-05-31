@@ -14,7 +14,6 @@ app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
-
 app.get("/api/todos", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM todos ORDER BY date ASC");
@@ -45,6 +44,35 @@ app.post("/api/todos", async (req, res) => {
   } catch (err) {
     console.error("Error inserting todo:", err);
     res.status(500).json({ error: "Failed to insert todo" });
+  }
+});
+
+app.put("/api/todos/:id", async (req, res) => {
+  const id = req.params.id;
+  const { text } = req.body;
+  console.log(`PUT /api/todos/${id} - received body:`, req.body);
+
+  if (!text) {
+    console.warn("Missing text field in request body");
+    return res.status(400).json({ error: "Text field is required" });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE todos SET text = $1 WHERE id = $2 RETURNING *",
+      [text, id]
+    );
+
+    if (result.rows.length === 0) {
+      console.warn(`Todo with id ${id} not found`);
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    console.log("Updated todo:", result.rows[0]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(`Error updating todo with id ${id}:`, err);
+    res.status(500).json({ error: "Failed to update todo" });
   }
 });
 
