@@ -75,7 +75,7 @@ function App() {
         .filter((todo) => {
           const todoDate = dayjs(todo.date).startOf("day");
           if (tab === "today") {
-            return todo.type === "today" && todoDate.isSame(today, "day");
+            return todoDate.isSame(today, "day");
           } else if (tab === "upcoming") {
             return todoDate.isAfter(today, "day");
           } else if (tab === "past") {
