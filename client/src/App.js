@@ -20,6 +20,14 @@ import Footer from "./components/Footer";
 
 const API = "https://todolist-backend-bk7s.onrender.com/api/todos";
 
+// Helper function to format date in local timezone
+const formatDateLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 function App() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
@@ -50,7 +58,7 @@ function App() {
       id: uuidv4(),
       text: input,
       type: tab,
-      date: format(selectedDate, "yyyy-MM-dd"), // Clean date formatting
+      date: formatDateLocal(selectedDate), // Use timezone-safe formatting
     };
 
     try {
