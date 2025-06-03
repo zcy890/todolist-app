@@ -2,8 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Container, Typography, Box } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import {
+  format,
+  parseISO,
+  startOfDay,
+  isAfter,
+  isBefore,
+  isSameDay,
+} from "date-fns";
 import TaskTabs from "./components/TaskTabs";
 import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
@@ -17,7 +24,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [tab, setTab] = useState("today");
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Use native Date object
 
   useEffect(() => {
     fetch(API)
@@ -28,7 +35,7 @@ function App() {
           setTodos(data);
         } else {
           console.warn("Expected array, got:", data);
-          setTodos([]); // fallback
+          setTodos([]);
         }
       })
       .catch((err) => {
@@ -43,21 +50,30 @@ function App() {
       id: uuidv4(),
       text: input,
       type: tab,
-      date: selectedDate.toDate().toISOString().split("T")[0], // This avoids UTC shift
+      date: format(selectedDate, "yyyy-MM-dd"), // Clean date formatting
     };
-    const res = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTodo),
-    });
-    const data = await res.json();
-    setTodos((prev) => (Array.isArray(prev) ? [...prev, data] : [data]));
-    setInput("");
+
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTodo),
+      });
+      const data = await res.json();
+      setTodos((prev) => (Array.isArray(prev) ? [...prev, data] : [data]));
+      setInput("");
+    } catch (err) {
+      console.error("Error adding todo:", err);
+    }
   };
 
   const deleteTodo = async (id) => {
-    await fetch(`${API}/${id}`, { method: "DELETE" });
-    setTodos(todos.filter((todo) => todo.id !== id));
+    try {
+      await fetch(`${API}/${id}`, { method: "DELETE" });
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (err) {
+      console.error("Error deleting todo:", err);
+    }
   };
 
   const updateTodo = async (id, updatedText) => {
@@ -82,33 +98,39 @@ function App() {
     setSelectedDate(newDate);
   };
 
-  const today = dayjs().startOf("day");
+  // Get today's date at start of day for consistent comparisons
+  const today = startOfDay(new Date());
 
   const filteredTodos = Array.isArray(todos)
     ? todos
         .filter((todo) => {
-          const todoDate = dayjs(todo.date).startOf("day");
+          // Parse the stored date string and normalize to start of day
+          const todoDate = startOfDay(parseISO(todo.date));
+
           if (tab === "today") {
-            return todoDate.isSame(today, "day");
+            return isSameDay(todoDate, today);
           } else if (tab === "upcoming") {
-            return todoDate.isAfter(today, "day");
+            return isAfter(todoDate, today);
           } else if (tab === "past") {
-            return todoDate.isBefore(today, "day");
+            return isBefore(todoDate, today);
           }
           return false;
         })
         .sort((a, b) => {
+          const dateA = parseISO(a.date);
+          const dateB = parseISO(b.date);
+
           // For past tasks, sort by most recent first (descending order)
           if (tab === "past") {
-            return dayjs(b.date).diff(dayjs(a.date));
+            return dateB - dateA;
           }
           // For today and upcoming, sort by earliest first (ascending order)
-          return dayjs(a.date).diff(dayjs(b.date));
+          return dateA - dateB;
         })
     : [];
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Container maxWidth="sm">
         <Box
           sx={{

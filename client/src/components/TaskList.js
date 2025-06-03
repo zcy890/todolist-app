@@ -13,19 +13,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
-import dayjs from "dayjs";
+import { format, parseISO, differenceInDays } from "date-fns";
 
 const TaskList = ({ tasks, onDelete, onUpdate, tab }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+
   const formatDate = (dateString) => {
-    return dayjs(dateString).format("MMMM D, YYYY"); // e.g., May 20, 2025
+    return format(parseISO(dateString), "MMMM d, yyyy"); // e.g., May 20, 2025
   };
 
   const getDaysOverdue = (dateString) => {
-    const taskDate = dayjs(dateString);
-    const today = dayjs();
-    return today.diff(taskDate, "day");
+    const taskDate = parseISO(dateString);
+    const today = new Date();
+    return differenceInDays(today, taskDate);
   };
 
   const handleEditStart = (todo) => {
